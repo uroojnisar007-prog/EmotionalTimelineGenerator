@@ -4,3 +4,4 @@ opencv-python-headless
 matplotlib
 pandas
 tensorflow
+gdown==5.1.0
