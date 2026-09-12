@@ -390,6 +390,14 @@ def _style_emotion_column(val):
     color = EMOTION_COLORS.get(str(val).lower(), '#ffffff')
     return f'color: {color}; font-weight: 600;'
 
+def _apply_emotion_style(df, column):
+    """pandas renamed Styler.applymap -> Styler.map in 2.1+ and dropped
+    applymap entirely in some newer builds, so support both."""
+    styler = df.style
+    if hasattr(styler, "map"):
+        return styler.map(_style_emotion_column, subset=[column])
+    return styler.applymap(_style_emotion_column, subset=[column])
+
 # =========================================================================
 # UPLOAD PANEL
 # =========================================================================
@@ -518,7 +526,7 @@ if uploaded_file is not None:
 
                 with tab_summary:
                     df_summary = pd.DataFrame(emotion_summary)
-                    styled_summary = df_summary.style.applymap(_style_emotion_column, subset=['Emotion'])
+                    styled_summary = _apply_emotion_style(df_summary, 'Emotion')
                     st.dataframe(styled_summary, use_container_width=True, hide_index=True)
 
                 with tab_graph:
@@ -560,7 +568,7 @@ if uploaded_file is not None:
                 with tab_frames:
                     df_timeline_display = pd.DataFrame(timeline_data).copy()
                     df_timeline_display['Emotion'] = df_timeline_display['Emotion'].str.upper()
-                    styled_frames = df_timeline_display.style.applymap(_style_emotion_column, subset=['Emotion'])
+                    styled_frames = _apply_emotion_style(df_timeline_display, 'Emotion')
                     st.dataframe(styled_frames, use_container_width=True, height=320, hide_index=True)
 
                     csv_data = pd.DataFrame(timeline_data).to_csv(index=False).encode('utf-8')
