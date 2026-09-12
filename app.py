@@ -22,10 +22,10 @@ MODEL_PATH = os.path.join(BASE_DIR, "emotion_model.h5")
 def load_emotion_model():
     try:
         if not os.path.exists(MODEL_PATH):
-            st.info("Downloading model file from cloud storage... Please wait.")
-            # Yahan apna Google Drive ka direct download link paste karein
-            url = "https://drive.google.com/file/d/10wnWscczkl1Jo8SO1dLp-9LvmTqbgxRV/view?usp=sharing"
-            gdown.download(url, MODEL_PATH, quiet=False)
+    st.info("Downloading model file from cloud storage... Please wait.")
+    file_id = "10wnWscczkl1Jo8SO1dLp-9LvmTqbgxRV"
+    url = f'https://drive.google.com/uc?id={file_id}'
+    gdown.download(url, MODEL_PATH, quiet=False, fuzzy=True)
         
         print("Loading Model...")
         model = load_model(MODEL_PATH)
