@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Timeline Analyzer - Professional</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Oswald:wght@500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="header-content">
+            <span class="logo">SENTIMENTIX</span>
+            <nav>
+                <a href="#analyzer">Analyzer</a>
+                <a href="#results">Results</a>
+                <a href="#contact">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container" id="analyzer">
+        <div class="hero-section">
+            <h1 class="main-title">AI-Powered Emotion Timeline Generator</h1>
+            <p class="hero-subtitle">Instantly analyze frame-by-frame sentiment dynamics from any video using deep learning.</p>
+        </div>
+
+        <div class="card upload-section">
+            <h2 class="card-title">1. Upload Video for Analysis</h2>
+            <form action="/analyze" method="post" enctype="multipart/form-data" id="uploadForm">
+                <div class="file-drop-area">
+                    <span class="choose-file-button">BROWSE VIDEO (.MP4)</span>
+                    <span class="file-message">Drag and drop your video file here, or click to select.</span>
+                    <input class="file-input" type="file" name="video" accept=".mp4" required>
+                </div>
+                
+                {% if error %}
+                <p class="error-message">Error: {{ error }}</p>
+                {% endif %}
+                <button type="submit" class="analyze-btn" onclick="showLoader()">ANALYZE NOW</button>
+            </form>
+            
+            <div id="loader" class="loader" style="display:none;">
+                <div class="spinner"></div>
+                <p>Processing frames and generating reports... Please wait.</p>
+            </div>
+        </div>
+
+        {% if processed %}
+        <section class="results-wrapper" id="results">
+            <h2 class="section-heading">2. Analysis Results</h2>
+            <p class="analysis-info">Video: <strong>{{ video_name }}</strong> | Total Frames: <strong>{{ timeline_data|length }}</strong></p>
+
+            <div class="card summary-box">
+                <h3 class="card-title">DOMINANT SENTIMENT SUMMARY</h3>
+                <h4 class="dominant-tag">Primary Emotion: 
+                    <span class="emotion-tag emotion-{{ dominant_emotion }}">
+                        {{ dominant_emotion|capitalize }} ({{ emotion_summary[0]['percentage'] }}%)
+                    </span>
+                </h4>
+                
+                <table class="summary-table">
+                    <thead>
+                        <tr>
+                            <th>EMOTION</th>
+                            <th>COUNT</th>
+                            <th>PERCENTAGE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in emotion_summary %}
+                        <tr>
+                            <td><span class="emotion-tag emotion-{{ item['emotion'] }}">{{ item['emotion']|capitalize }}</span></td>
+                            <td>{{ item['count'] }}</td>
+                            <td>{{ item['percentage'] }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card graph-card">
+                <h3 class="card-title">EMOTION TIMELINE GRAPH</h3>
+                <img src="{{ url_for('static', filename='results/' + graph_link) }}" alt="Emotion Graph" class="graph-img">
+            </div>
+
+            <div class="card timeline-card">
+                <h3 class="card-title">FRAME-WISE BREAKDOWN</h3>
+                <div class="table-wrapper">
+                    <table class="timeline-table">
+                        <thead>
+                            <tr>
+                                <th>FRAME #</th>
+                                <th>DETECTED EMOTION</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in timeline_data %}
+                            <tr>
+                                <td>{{ item['frame'] }}</td>
+                                <td><span class="emotion-tag emotion-{{ item['emotion'] }}">{{ item['emotion']|capitalize }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="download-section">
+                <a href="{{ url_for('download_file', filename=csv_link) }}" class="download-btn">DOWNLOAD FULL CSV REPORT</a>
+            </div>
+        </section>
+        {% endif %}
+
+    </div>
+
+    <footer class="main-footer">
+        <p>&copy; 2025 SENTIMENTIX AI. All rights reserved. | Developed by Urooj</p>
+    </footer>
+
+    <script>
+        document.querySelector('.file-input').addEventListener('change', function() {
+            var fileName = this.files[0].name;
+            document.querySelector('.file-message').textContent = fileName;
+        });
+
+        function showLoader() {
+            // Hide the form and show the loader on submit
+            document.getElementById('uploadForm').style.display = 'none';
+            document.getElementById('loader').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
