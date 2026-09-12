@@ -9,17 +9,24 @@ from collections import Counter
 import streamlit as st
 from tensorflow.keras.models import load_model
 import tempfile
+import gdown
 
 st.set_page_config(page_title="Emotion Timeline Generator", layout="wide")
 
 # --- CONFIGURATION ---
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, "saved_folder", "emotion_model.h5")
+MODEL_PATH = os.path.join(BASE_DIR, "emotion_model.h5")
 
-# Load Model Once Globally with caching
+# Load Model Once Globally with caching & auto-download
 @st.cache_resource
 def load_emotion_model():
     try:
+        if not os.path.exists(MODEL_PATH):
+            st.info("Downloading model file from cloud storage... Please wait.")
+            # Yahan apna Google Drive ka direct download link paste karein
+            url = "https://drive.google.com/file/d/10wnWscczkl1Jo8SO1dLp-9LvmTqbgxRV/view?usp=sharing"
+            gdown.download(url, MODEL_PATH, quiet=False)
+        
         print("Loading Model...")
         model = load_model(MODEL_PATH)
         print("Model Loaded Successfully!")
@@ -47,7 +54,7 @@ if uploaded_file is not None:
     
     if st.button("Start Analysis"):
         if model is None:
-            st.error("Model not loaded. Check saved_folder/emotion_model.h5 path.")
+            st.error("Model not loaded. Check model download link or path.")
         else:
             with st.spinner("Processing video frames and predicting emotions..."):
                 cap = cv2.VideoCapture(video_path)
