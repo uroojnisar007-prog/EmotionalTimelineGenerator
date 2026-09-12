@@ -446,6 +446,3 @@ if uploaded_file is not None:
 
 # --- FOOTER ---
 st.markdown('<div class="footer">SENTIMENTIX &nbsp;•&nbsp; AI-Powered Emotion Timeline Generator</div>', unsafe_allow_html=True)
-                    mime="text/csv"
-                )
-                st.markdown('</div>', unsafe_allow_html=True)
