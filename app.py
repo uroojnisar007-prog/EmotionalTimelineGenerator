@@ -139,7 +139,13 @@ if uploaded_file is not None:
     video_path = tfile.name
 
     st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-    st.video(uploaded_file)
+    st.markdown('<div class="section-header">Uploaded Video Preview</div>', unsafe_allow_html=True)
+    
+    # Compact & Centered Video Layout
+    vcol1, vcol2, vcol3 = st.columns([1, 2, 1])
+    with vcol2:
+        st.video(uploaded_file)
+        
     st.markdown('</div>', unsafe_allow_html=True)
     
     if st.button("ANALYZE NOW"):
