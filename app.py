@@ -13,270 +13,333 @@ import gdown
 
 # Page Configuration
 st.set_page_config(
-    page_title="SENTIMENTIX - AI-Powered Emotion Timeline Generator",
+    page_title="Sentimentix — Emotion Timeline Generator",
     page_icon="🎭",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
-# --- CUSTOM SENTIMENTIX CSS STYLING ---
-# NOTE: color palette is unchanged from the original app (#121212, #ffc107,
-# #1a1a1a, #333333, #b0b0b0, #e0a800) — only layout/spacing/typography/UX
-# has been reworked.
+# =========================================================================
+# STYLING
+# Color palette is unchanged from the original app: #121212, #1a1a1a,
+# #333333, #ffc107, #e0a800, #b0b0b0. Everything else — type, spacing,
+# iconography, layout — has been rebuilt.
+# =========================================================================
 st.markdown("""
 <style>
-    /* Global Background & Font */
-    .stApp {
-        background-color: #121212;
-        color: #ffffff;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
 
-    /* Tighten default Streamlit top padding for a more "app-like" feel */
-    .block-container {
-        padding-top: 1.5rem;
-        padding-bottom: 3rem;
-        max-width: 1100px;
-    }
+:root {
+    --bg: #121212;
+    --panel: #1a1a1a;
+    --panel-alt: #161616;
+    --border: #333333;
+    --border-soft: #262626;
+    --amber: #ffc107;
+    --amber-hover: #e0a800;
+    --text: #ffffff;
+    --muted: #b0b0b0;
+    --faint: #6e6e6e;
+}
 
-    /* --- NAVBAR --- */
-    .navbar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 14px 22px;
-        background-color: #1a1a1a;
-        border: 1px solid #333333;
-        border-radius: 12px;
-        margin-bottom: 28px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-    }
-    .brand-title {
-        font-size: 22px;
-        font-weight: 800;
-        color: #ffc107;
-        letter-spacing: 2px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .nav-links span {
-        margin-left: 26px;
-        color: #b0b0b0;
-        font-size: 14px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        cursor: pointer;
-        padding-bottom: 4px;
-        border-bottom: 2px solid transparent;
-        transition: color 0.2s ease, border-color 0.2s ease;
-    }
-    .nav-links span:hover {
-        color: #ffc107;
-        border-bottom: 2px solid #ffc107;
-    }
+html, body, .stApp {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, sans-serif;
+}
 
-    /* --- HERO / TITLE --- */
-    .hero {
-        text-align: center;
-        margin-bottom: 34px;
-    }
-    .main-title {
-        font-size: 38px;
-        font-weight: 800;
-        color: #ffc107;
-        text-shadow: 0 0 15px rgba(255, 193, 7, 0.5);
-        margin-bottom: 8px;
-        line-height: 1.2;
-    }
-    .subtitle {
-        color: #b0b0b0;
-        font-size: 15.5px;
-        max-width: 640px;
-        margin: 0 auto;
-        line-height: 1.5;
-    }
+.block-container {
+    padding-top: 1.2rem;
+    padding-bottom: 4rem;
+    max-width: 1180px;
+}
 
-    /* --- STEP PILL (small numbered tag above section headers) --- */
-    .step-pill {
-        display: inline-block;
-        background-color: rgba(255, 193, 7, 0.12);
-        color: #ffc107;
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 1px;
-        padding: 4px 12px;
-        border-radius: 20px;
-        border: 1px solid rgba(255, 193, 7, 0.35);
-        margin-bottom: 10px;
-    }
+h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
 
-    /* Card Container Styling */
-    .custom-card {
-        background-color: #1a1a1a;
-        border: 1px solid #333333;
-        border-radius: 14px;
-        padding: 28px 30px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-        margin-bottom: 22px;
-        transition: border-color 0.2s ease;
-    }
-    .custom-card:hover {
-        border-color: #4a4a4a;
-    }
+/* ---------- NAVBAR ---------- */
+.nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 18px;
+    margin-bottom: 40px;
+    border-bottom: 1px solid var(--border-soft);
+}
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: 0.2px;
+    color: var(--text);
+}
+.nav-brand .mark {
+    width: 9px;
+    height: 22px;
+    background: var(--amber);
+    border-radius: 1px;
+    display: inline-block;
+}
+.nav-links { display: flex; gap: 30px; }
+.nav-links span {
+    color: var(--muted);
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+.nav-links span:hover { color: var(--amber); }
 
-    /* Section Headings */
-    .section-header {
-        color: #ffc107;
-        font-size: 20px;
-        font-weight: 700;
-        margin-bottom: 4px;
-        letter-spacing: 0.5px;
-    }
-    .section-subtext {
-        color: #808080;
-        font-size: 13.5px;
-        margin-bottom: 18px;
-    }
-    .section-divider {
-        border: none;
-        border-top: 1px solid #333333;
-        margin: 0 0 20px 0;
-    }
+/* ---------- HERO ---------- */
+.eyebrow {
+    color: var(--faint);
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 14px;
+}
+.hero-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 42px;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    margin-bottom: 18px;
+}
+.hero-title .accent { color: var(--amber); }
+.hero-copy {
+    color: var(--muted);
+    font-size: 15.5px;
+    line-height: 1.65;
+    max-width: 460px;
+    margin-bottom: 32px;
+}
+.steps { display: flex; flex-direction: column; gap: 16px; }
+.step-row { display: flex; align-items: flex-start; gap: 14px; }
+.step-num {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11.5px; font-weight: 600;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+}
+.step-text { color: var(--muted); font-size: 14px; padding-top: 2px; }
+.step-text b { color: var(--text); font-weight: 600; }
 
-    /* Upload dropzone helper text */
-    .upload-hint {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        color: #808080;
-        font-size: 13px;
-        margin-top: 10px;
-    }
+.hero-graphic {
+    background-color: var(--panel);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    padding: 20px 22px 14px 22px;
+    height: 100%;
+}
+.hero-graphic .g-label {
+    color: var(--faint);
+    font-size: 11.5px;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.3px;
+    margin-bottom: 6px;
+}
 
-    /* Customizing Streamlit Buttons */
-    .stButton>button {
-        background-color: #ffc107 !important;
-        color: #121212 !important;
-        font-weight: bold !important;
-        border-radius: 8px !important;
-        width: 100%;
-        padding: 12px;
-        border: none;
-        font-size: 15.5px;
-        letter-spacing: 1px;
-        transition: transform 0.15s ease, background-color 0.15s ease;
-    }
-    .stButton>button:hover {
-        background-color: #e0a800 !important;
-        transform: translateY(-1px);
-    }
-    .stButton>button:active {
-        transform: translateY(0px);
-    }
+/* ---------- SECTION LABELS ---------- */
+.section-divider {
+    border: none;
+    border-top: 1px solid var(--border-soft);
+    margin: 46px 0 34px 0;
+}
+.section-label {
+    color: var(--faint);
+    font-size: 12.5px;
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+.section-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 24px;
+}
 
-    /* Download button — keep same accent but slightly distinct outline style */
-    .stDownloadButton>button {
-        background-color: transparent !important;
-        color: #ffc107 !important;
-        font-weight: bold !important;
-        border-radius: 8px !important;
-        width: 100%;
-        padding: 12px;
-        border: 1.5px solid #ffc107 !important;
-        font-size: 14.5px;
-        letter-spacing: 0.8px;
-        transition: background-color 0.15s ease, color 0.15s ease;
-    }
-    .stDownloadButton>button:hover {
-        background-color: #ffc107 !important;
-        color: #121212 !important;
-    }
+/* ---------- PANELS ---------- */
+.panel {
+    background-color: var(--panel);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    padding: 26px 28px;
+    margin-bottom: 20px;
+}
+.panel-icon-row { display: flex; gap: 18px; align-items: flex-start; margin-bottom: 18px; }
+.icon-badge {
+    flex-shrink: 0;
+    width: 38px; height: 38px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--amber);
+}
+.panel-heading { font-weight: 600; font-size: 16px; color: var(--text); margin-bottom: 3px; }
+.panel-subtext { color: var(--muted); font-size: 13.5px; }
 
-    /* Metric styling */
-    div[data-testid="stMetric"] {
-        background-color: #121212;
-        border: 1px solid #333333;
-        border-radius: 10px;
-        padding: 14px 10px;
-    }
-    div[data-testid="stMetricValue"] {
-        color: #ffc107 !important;
-    }
-    div[data-testid="stMetricLabel"] {
-        color: #b0b0b0 !important;
-    }
+/* ---------- FILE UPLOADER ---------- */
+section[data-testid="stFileUploaderDropzone"] {
+    background-color: var(--bg) !important;
+    border: 1px dashed var(--border) !important;
+    border-radius: 6px !important;
+}
+section[data-testid="stFileUploaderDropzone"] small { color: var(--faint) !important; }
+section[data-testid="stFileUploaderDropzone"] button {
+    background-color: var(--panel) !important;
+    color: var(--amber) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 5px !important;
+}
 
-    /* Tabs */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 6px;
-        border-bottom: 1px solid #333333;
-    }
-    .stTabs [data-baseweb="tab"] {
-        color: #b0b0b0;
-        font-weight: 600;
-        padding: 10px 16px;
-    }
-    .stTabs [aria-selected="true"] {
-        color: #ffc107 !important;
-        border-bottom: 2px solid #ffc107 !important;
-    }
+/* ---------- BUTTONS ---------- */
+.stButton>button {
+    background-color: var(--amber) !important;
+    color: var(--bg) !important;
+    font-weight: 600 !important;
+    font-family: 'Inter', sans-serif;
+    border-radius: 6px !important;
+    width: 100%;
+    padding: 11px;
+    border: none;
+    font-size: 14.5px;
+    transition: background-color 0.15s ease;
+}
+.stButton>button:hover { background-color: var(--amber-hover) !important; }
 
-    /* Dominant emotion badge */
-    .dominant-badge {
-        text-align: center;
-        margin: 6px auto 22px auto;
-    }
-    .dominant-badge .label {
-        color: #808080;
-        font-size: 13px;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        margin-bottom: 6px;
-    }
-    .dominant-badge .value {
-        display: inline-block;
-        color: #121212;
-        background-color: #ffc107;
-        font-size: 22px;
-        font-weight: 800;
-        letter-spacing: 1px;
-        padding: 8px 26px;
-        border-radius: 30px;
-        box-shadow: 0 0 20px rgba(255, 193, 7, 0.35);
-    }
+.stDownloadButton>button {
+    background-color: transparent !important;
+    color: var(--muted) !important;
+    font-weight: 500 !important;
+    border-radius: 6px !important;
+    width: 100%;
+    padding: 11px;
+    border: 1px solid var(--border) !important;
+    font-size: 14px;
+    transition: all 0.15s ease;
+}
+.stDownloadButton>button:hover {
+    border-color: var(--amber) !important;
+    color: var(--amber) !important;
+}
 
-    /* Footer */
-    .footer {
-        text-align: center;
-        color: #555555;
-        font-size: 12.5px;
-        margin-top: 40px;
-        padding-top: 18px;
-        border-top: 1px solid #222222;
-    }
+/* ---------- PROGRESS BAR ---------- */
+div[data-testid="stProgress"] div[role="progressbar"] > div { background-color: var(--amber) !important; }
+
+/* ---------- METRICS ---------- */
+div[data-testid="stMetric"] {
+    background-color: var(--panel);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    padding: 16px 18px;
+}
+div[data-testid="stMetricLabel"] { color: var(--muted) !important; font-size: 13px !important; }
+div[data-testid="stMetricValue"] {
+    color: var(--amber) !important;
+    font-family: 'IBM Plex Mono', monospace !important;
+}
+
+/* ---------- TABS ---------- */
+.stTabs [data-baseweb="tab-list"] { gap: 4px; border-bottom: 1px solid var(--border-soft); }
+.stTabs [data-baseweb="tab"] {
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 14px;
+    padding: 8px 4px;
+    margin-right: 24px;
+}
+.stTabs [aria-selected="true"] {
+    color: var(--text) !important;
+    border-bottom: 2px solid var(--amber) !important;
+}
+
+/* ---------- DATAFRAME ---------- */
+div[data-testid="stDataFrame"] { border: 1px solid var(--border-soft); border-radius: 6px; }
+
+/* ---------- FOOTER ---------- */
+.footer {
+    color: var(--faint);
+    font-size: 12.5px;
+    margin-top: 60px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border-soft);
+    display: flex;
+    justify-content: space-between;
+}
 </style>
 """, unsafe_allow_html=True)
 
-# --- NAVIGATION HEADER ---
+# =========================================================================
+# ICONS (inline SVG, inherit currentColor)
+# =========================================================================
+ICON_UPLOAD = """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="M6 10l6-6 6 6"/><path d="M4 20h16"/></svg>"""
+ICON_PLAY = """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4"/></svg>"""
+
+# =========================================================================
+# NAVBAR
+# =========================================================================
 st.markdown("""
-<div class="navbar">
-    <div class="brand-title">🎭 SENTIMENTIX</div>
-    <div class="nav-links">
-        <span>Analyzer</span><span>Results</span><span>Contact</span>
+<div class="nav">
+    <div class="nav-brand"><span class="mark"></span>Sentimentix</div>
+    <div class="nav-links"><span>Analyzer</span><span>Results</span><span>Docs</span></div>
+</div>
+""", unsafe_allow_html=True)
+
+# =========================================================================
+# HERO — asymmetric two-column: headline + process, and a real timeline
+# graphic depicting what the tool produces.
+# =========================================================================
+hero_left, hero_right = st.columns([1.1, 0.9], gap="large")
+
+with hero_left:
+    st.markdown("""
+    <div class="eyebrow">Video sentiment analysis</div>
+    <div class="hero-title">Turn footage into an<br><span class="accent">emotional timeline.</span></div>
+    <div class="hero-copy">
+        Upload a video and Sentimentix scores every frame with a deep learning
+        model, then maps the emotional arc of the footage from start to finish.
     </div>
-</div>
-""", unsafe_allow_html=True)
+    <div class="steps">
+        <div class="step-row"><div class="step-num">1</div><div class="step-text"><b>Upload</b> a clip in MP4, MOV or AVI.</div></div>
+        <div class="step-row"><div class="step-num">2</div><div class="step-text"><b>Every frame</b> is scored across eight emotion classes.</div></div>
+        <div class="step-row"><div class="step-num">3</div><div class="step-text"><b>Read the result</b> as a timeline, table, or CSV export.</div></div>
+    </div>
+    """, unsafe_allow_html=True)
 
-# --- HERO ---
-st.markdown("""
-<div class="hero">
-    <div class="main-title">AI-Powered Emotion Timeline Generator</div>
-    <div class="subtitle">Instantly analyze frame-by-frame sentiment dynamics from any video using deep learning.</div>
-</div>
-""", unsafe_allow_html=True)
+with hero_right:
+    st.markdown("""
+    <div class="hero-graphic">
+        <div class="g-label">emotion_timeline.preview</div>
+        <svg width="100%" height="220" viewBox="0 0 460 220" xmlns="http://www.w3.org/2000/svg">
+            <line x1="0" y1="60" x2="460" y2="60" stroke="#262626" stroke-width="1"/>
+            <line x1="0" y1="112" x2="460" y2="112" stroke="#333333" stroke-width="1" stroke-dasharray="3 4"/>
+            <line x1="0" y1="164" x2="460" y2="164" stroke="#262626" stroke-width="1"/>
+            <polyline fill="none" stroke="#ffc107" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"
+                points="10,150 45,120 80,160 115,90 150,132 185,55 220,105 255,150 290,78 325,140 360,95 395,150 430,118"/>
+            <circle cx="185" cy="55" r="4" fill="#ffc107"/>
+            <circle cx="80" cy="160" r="4" fill="#666666"/>
+            <circle cx="290" cy="78" r="4" fill="#ffc107"/>
+            <text x="165" y="40" fill="#ffc107" font-size="11" font-family="IBM Plex Mono, monospace">happy</text>
+            <text x="60" y="188" fill="#8a8a8a" font-size="11" font-family="IBM Plex Mono, monospace">sad</text>
+            <text x="298" y="64" fill="#ffc107" font-size="11" font-family="IBM Plex Mono, monospace">surprised</text>
+            <text x="4" y="108" fill="#666666" font-size="10" font-family="IBM Plex Mono, monospace">neutral</text>
+        </svg>
+    </div>
+    """, unsafe_allow_html=True)
 
-# --- CONFIGURATION & MODEL LOADING ---
+st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+
+# =========================================================================
+# MODEL LOADING (unchanged logic)
+# =========================================================================
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "emotion_model.h5")
 
@@ -298,11 +361,22 @@ def load_emotion_model():
 model = load_emotion_model()
 emotion_labels = ['angry', 'calm', 'disgust', 'fearful', 'happy', 'neutral', 'sad', 'surprised']
 
-# --- UPLOAD SECTION CARD ---
-st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-st.markdown('<div class="step-pill">STEP 1</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-header">Upload Video for Analysis</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-subtext">Supported formats: MP4, MOV, AVI &nbsp;•&nbsp; Larger videos take longer to process</div>', unsafe_allow_html=True)
+# =========================================================================
+# UPLOAD PANEL
+# =========================================================================
+st.markdown('<div class="section-label">Analyzer</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Add a video</div>', unsafe_allow_html=True)
+
+st.markdown(f"""
+<div class="panel">
+    <div class="panel-icon-row">
+        <div class="icon-badge">{ICON_UPLOAD}</div>
+        <div>
+            <div class="panel-heading">Choose a file to analyze</div>
+            <div class="panel-subtext">MP4, MOV or AVI — shorter clips process faster</div>
+        </div>
+    </div>
+""", unsafe_allow_html=True)
 uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "mov", "avi"], label_visibility="collapsed")
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -311,18 +385,22 @@ if uploaded_file is not None:
     tfile.write(uploaded_file.read())
     video_path = tfile.name
 
-    st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-    st.markdown('<div class="step-pill">STEP 2</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-header">Preview & Run Analysis</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="section-subtext">File: {uploaded_file.name}</div>', unsafe_allow_html=True)
-    st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="panel">
+        <div class="panel-icon-row">
+            <div class="icon-badge">{ICON_PLAY}</div>
+            <div>
+                <div class="panel-heading">{uploaded_file.name}</div>
+                <div class="panel-subtext">Preview the clip, then run the analysis</div>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
 
-    # Compact & Centered Video Layout
     vcol1, vcol2, vcol3 = st.columns([1, 2, 1])
     with vcol2:
         st.video(uploaded_file)
         st.write("")
-        analyze_clicked = st.button("▶  ANALYZE NOW")
+        analyze_clicked = st.button("Analyze video")
 
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -358,7 +436,7 @@ if uploaded_file is not None:
 
                 if total_frames_hint:
                     pct = min(frame_count / total_frames_hint, 1.0)
-                    progress_bar.progress(pct, text=f"Processing frame {frame_count} / {total_frames_hint}")
+                    progress_bar.progress(pct, text=f"Processing frame {frame_count} of {total_frames_hint}")
                 else:
                     progress_bar.progress(0, text=f"Processing frame {frame_count}...")
 
@@ -368,7 +446,7 @@ if uploaded_file is not None:
             if not timeline_data:
                 st.error("Could not process video. Check file format or codec.")
             else:
-                st.success("Analysis Complete!")
+                st.success("Analysis complete.")
 
                 # Calculate Summary
                 emotion_counts = Counter(raw_emotions)
@@ -383,29 +461,20 @@ if uploaded_file is not None:
 
                 dominant_emotion = emotion_summary[0]['Emotion'] if emotion_summary else 'NEUTRAL'
 
-                # --- RESULTS SECTION CARD ---
-                st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-                st.markdown('<div class="step-pill">STEP 3</div>', unsafe_allow_html=True)
-                st.markdown('<div class="section-header">Analysis Results</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="section-subtext">Video: {uploaded_file.name}</div>', unsafe_allow_html=True)
+                # =========================================================
+                # RESULTS
+                # =========================================================
                 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+                st.markdown('<div class="section-label">Analyzer</div>', unsafe_allow_html=True)
+                st.markdown('<div class="section-title">Results</div>', unsafe_allow_html=True)
 
-                # Key metrics row
                 m1, m2, m3 = st.columns(3)
-                m1.metric("Total Frames Analyzed", frame_count)
-                m2.metric("Unique Emotions Detected", len(emotion_summary))
-                m3.metric("Dominant Emotion", dominant_emotion)
+                m1.metric("Frames analyzed", frame_count)
+                m2.metric("Emotions detected", len(emotion_summary))
+                m3.metric("Dominant emotion", dominant_emotion)
 
-                st.markdown(f"""
-                <div class="dominant-badge">
-                    <div class="label">Primary Emotion Detected</div>
-                    <div class="value">{dominant_emotion}</div>
-                </div>
-                """, unsafe_allow_html=True)
-
-                tab_summary, tab_graph, tab_frames = st.tabs(
-                    ["📊  Sentiment Summary", "📈  Timeline Graph", "🗂  Frame-Wise Breakdown"]
-                )
+                st.write("")
+                tab_summary, tab_graph, tab_frames = st.tabs(["Summary", "Timeline", "Frame data"])
 
                 with tab_summary:
                     df_summary = pd.DataFrame(emotion_summary)
@@ -419,8 +488,8 @@ if uploaded_file is not None:
                     ax.set_facecolor('#121212')
 
                     ax.plot(df_timeline['Frame'], df_timeline['Emotion'], marker='o', linestyle='-', markersize=2, color='#ffc107')
-                    ax.set_title(f"Emotion Timeline: {uploaded_file.name}", color='#ffc107', fontsize=14)
-                    ax.set_xlabel("Frame Number", color='#b0b0b0')
+                    ax.set_title(f"Emotion timeline — {uploaded_file.name}", color='#ffc107', fontsize=13)
+                    ax.set_xlabel("Frame number", color='#b0b0b0')
                     ax.set_ylabel("Emotion", color='#b0b0b0')
                     ax.tick_params(colors='#b0b0b0')
                     ax.grid(True, alpha=0.2, color='#444')
@@ -436,13 +505,18 @@ if uploaded_file is not None:
                     csv_data = pd.DataFrame(timeline_data).to_csv(index=False).encode('utf-8')
                     st.write("")
                     st.download_button(
-                        label="⬇  DOWNLOAD FULL CSV REPORT",
+                        label="Download CSV report",
                         data=csv_data,
                         file_name=f"{os.path.splitext(uploaded_file.name)[0]}_timeline.csv",
                         mime="text/csv"
                     )
 
-                st.markdown('</div>', unsafe_allow_html=True)
-
-# --- FOOTER ---
-st.markdown('<div class="footer">SENTIMENTIX &nbsp;•&nbsp; AI-Powered Emotion Timeline Generator</div>', unsafe_allow_html=True)
+# =========================================================================
+# FOOTER
+# =========================================================================
+st.markdown("""
+<div class="footer">
+    <span>Sentimentix</span>
+    <span>Emotion timeline generator</span>
+</div>
+""", unsafe_allow_html=True)
