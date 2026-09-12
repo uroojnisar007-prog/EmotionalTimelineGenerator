@@ -13,7 +13,7 @@ import gdown
 
 # Page Configuration
 st.set_page_config(
-    page_title="Sentimentix — Emotion Timeline Generator",
+    page_title="Sentimentix",
     page_icon="🎭",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -48,8 +48,16 @@ html, body, .stApp {
     font-family: 'Inter', -apple-system, sans-serif;
 }
 
+/* Streamlit's own top toolbar sits fixed above the page and was covering
+   our custom nav — make it transparent and push content clear of it. */
+header[data-testid="stHeader"] {
+    background-color: transparent;
+    height: 3.2rem;
+}
+div[data-testid="stToolbar"] { right: 1rem; }
+
 .block-container {
-    padding-top: 1.2rem;
+    padding-top: 0.5rem;
     padding-bottom: 4rem;
     max-width: 1180px;
 }
@@ -61,9 +69,11 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-bottom: 18px;
+    padding: 16px 22px;
     margin-bottom: 40px;
-    border-bottom: 1px solid var(--border-soft);
+    background-color: var(--panel);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
 }
 .nav-brand {
     display: flex;
@@ -361,6 +371,25 @@ def load_emotion_model():
 model = load_emotion_model()
 emotion_labels = ['angry', 'calm', 'disgust', 'fearful', 'happy', 'neutral', 'sad', 'surprised']
 
+# Per-emotion accent colors — used to color-code frame-wise results in the
+# tables and the timeline graph. The core brand palette (background/panel/
+# amber accent) is untouched; these are additional, purely for encoding
+# which emotion is which at a glance.
+EMOTION_COLORS = {
+    'angry': '#ff5c5c',
+    'calm': '#4dd0e1',
+    'disgust': '#8bc34a',
+    'fearful': '#b388ff',
+    'happy': '#ffc107',
+    'neutral': '#b0b0b0',
+    'sad': '#5c7cfa',
+    'surprised': '#ff8fb3',
+}
+
+def _style_emotion_column(val):
+    color = EMOTION_COLORS.get(str(val).lower(), '#ffffff')
+    return f'color: {color}; font-weight: 600;'
+
 # =========================================================================
 # UPLOAD PANEL
 # =========================================================================
@@ -468,31 +497,62 @@ if uploaded_file is not None:
                 st.markdown('<div class="section-label">Analyzer</div>', unsafe_allow_html=True)
                 st.markdown('<div class="section-title">Results</div>', unsafe_allow_html=True)
 
+                dominant_color = EMOTION_COLORS.get(dominant_emotion.lower(), '#ffc107')
+
                 m1, m2, m3 = st.columns(3)
                 m1.metric("Frames analyzed", frame_count)
                 m2.metric("Emotions detected", len(emotion_summary))
-                m3.metric("Dominant emotion", dominant_emotion)
+                with m3:
+                    st.markdown(f"""
+                    <div style="background-color:#1a1a1a;border:1px solid #262626;border-radius:8px;padding:16px 18px;">
+                        <div style="color:#b0b0b0;font-size:13px;margin-bottom:6px;">Dominant emotion</div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span style="width:10px;height:10px;border-radius:50%;background-color:{dominant_color};display:inline-block;"></span>
+                            <span style="font-family:'IBM Plex Mono',monospace;font-size:1.6rem;font-weight:500;color:{dominant_color};">{dominant_emotion}</span>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
                 st.write("")
                 tab_summary, tab_graph, tab_frames = st.tabs(["Summary", "Timeline", "Frame data"])
 
                 with tab_summary:
                     df_summary = pd.DataFrame(emotion_summary)
-                    st.dataframe(df_summary, use_container_width=True, hide_index=True)
+                    styled_summary = df_summary.style.applymap(_style_emotion_column, subset=['Emotion'])
+                    st.dataframe(styled_summary, use_container_width=True, hide_index=True)
 
                 with tab_graph:
                     df_timeline = pd.DataFrame(timeline_data)
+                    point_colors = df_timeline['Emotion'].map(lambda e: EMOTION_COLORS.get(e, '#ffffff'))
 
                     fig, ax = plt.subplots(figsize=(10, 4))
                     fig.patch.set_facecolor('#1a1a1a')
                     ax.set_facecolor('#121212')
 
-                    ax.plot(df_timeline['Frame'], df_timeline['Emotion'], marker='o', linestyle='-', markersize=2, color='#ffc107')
+                    # Thin connecting line for sequence, colored dots per detected emotion
+                    ax.plot(df_timeline['Frame'], df_timeline['Emotion'], linestyle='-', linewidth=0.8, color='#3a3a3a', zorder=1)
+                    ax.scatter(df_timeline['Frame'], df_timeline['Emotion'], c=point_colors, s=22, zorder=2, edgecolors='none')
+
                     ax.set_title(f"Emotion timeline — {uploaded_file.name}", color='#ffc107', fontsize=13)
                     ax.set_xlabel("Frame number", color='#b0b0b0')
                     ax.set_ylabel("Emotion", color='#b0b0b0')
                     ax.tick_params(colors='#b0b0b0')
-                    ax.grid(True, alpha=0.2, color='#444')
+                    ax.grid(True, alpha=0.15, color='#444')
+                    for spine in ax.spines.values():
+                        spine.set_color('#333333')
+
+                    # Legend only for emotions actually present in this video
+                    present_emotions = list(dict.fromkeys(raw_emotions))
+                    legend_handles = [
+                        plt.Line2D([0], [0], marker='o', color='none', markerfacecolor=EMOTION_COLORS.get(e, '#ffffff'),
+                                   markersize=7, label=e.upper())
+                        for e in present_emotions
+                    ]
+                    legend = ax.legend(handles=legend_handles, loc='upper center', bbox_to_anchor=(0.5, -0.18),
+                                        ncol=min(len(legend_handles), 8), frameon=False, fontsize=9)
+                    for text in legend.get_texts():
+                        text.set_color('#b0b0b0')
+
                     plt.tight_layout()
 
                     st.pyplot(fig)
@@ -500,7 +560,8 @@ if uploaded_file is not None:
                 with tab_frames:
                     df_timeline_display = pd.DataFrame(timeline_data).copy()
                     df_timeline_display['Emotion'] = df_timeline_display['Emotion'].str.upper()
-                    st.dataframe(df_timeline_display, use_container_width=True, height=320, hide_index=True)
+                    styled_frames = df_timeline_display.style.applymap(_style_emotion_column, subset=['Emotion'])
+                    st.dataframe(styled_frames, use_container_width=True, height=320, hide_index=True)
 
                     csv_data = pd.DataFrame(timeline_data).to_csv(index=False).encode('utf-8')
                     st.write("")
